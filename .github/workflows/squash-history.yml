@@ -1,0 +1,30 @@
+name: Squash Git History
+
+on:
+  workflow_dispatch:  # Allows manual trigger
+  schedule:
+    - cron: '0 12 * * *'  # Runs daily at 12:00 UTC
+
+jobs:
+  squash-history:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Needed to rewrite all commits
+
+      - name: Set Git identity
+        run: |
+          git config user.name "hippocritical"
+          git config user.email "hippocritical@users.noreply.github.com"
+
+      - name: Squash all commits into one
+        run: |
+          git reset $(git rev-list --max-parents=0 HEAD)
+          git add -A
+          git commit -m "Fresh start: squashed entire history"
+
+      - name: Force push new history
+        run: git push --force
